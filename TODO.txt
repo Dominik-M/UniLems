@@ -1,0 +1,15 @@
+- Implement remaining level, last done: 5
+- Fix stair building
+- Traps
+- One-Way-Dig Terrain
+- Death animations
+
+
+All Colors:
+ColorEmpty = RGBA(0, 0, 0, 255)
+ColorDirt = RGBA(255, 235, 4, 255)
+ColorSteel = RGBA(160, 32, 240, 255)
+ColorFire = RGBA(255, 0, 0, 255)
+ColorWater = RGBA(0, 0, 255, 255)
+ColorOneWayLeft = RGBA(0, 100, 0, 255)
+ColorOneWayRight = RGBA(144, 238, 144, 255)

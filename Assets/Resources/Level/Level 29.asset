@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a83b944858f94ac4882224eb0acc5c8f, type: 3}
+  m_Name: Level 29
+  m_EditorClassIdentifier: Assembly-CSharp::Level
+  locked: 0
+  totalGuys: 0
+  spawnDelay: 0
+  minGuysSavedToWin: 0
+  skillUsages: 0000000000000000000000000000000000000000000000000000000000000000
+  levelPrefab: {fileID: 8829729640977892095, guid: f0c7d42bd701b5f409450ec1cc4b1001, type: 3}
+  bgm: {fileID: 0}
+  visualTexture: {fileID: 2800000, guid: b740a37e23be6c9498b934a72afecf26, type: 3}
+  logicMask: {fileID: 2800000, guid: 6e275ddb6b6651345abec9ad0c36900f, type: 3}
+  width: 465
+  height: 160
+  mode: 2
+  threshold: 0.1
