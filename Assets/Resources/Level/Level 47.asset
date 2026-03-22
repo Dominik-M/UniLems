@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a83b944858f94ac4882224eb0acc5c8f, type: 3}
   m_Name: Level 47
   m_EditorClassIdentifier: Assembly-CSharp::Level
-  locked: 0
+  locked: 1
   totalGuys: 0
   spawnDelay: 0
   minGuysSavedToWin: 0

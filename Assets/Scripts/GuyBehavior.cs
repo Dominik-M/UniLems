@@ -361,10 +361,10 @@ public class GuyBehavior : MonoBehaviour
         // Check collision
         float highestY;
         TerrainType highestTerrain = terrain.GetHighestSolidPixelInColumn(nextpos.x, nextpos.y - size.y / 2, nextpos.y + size.y / 2, out highestY);
-        if (highestTerrain != TerrainType.Empty)
+        if (highestTerrain != TerrainType.Empty && !TerrainManager.IsTerrainPassable(highestTerrain))
         {
             float d = Mathf.Abs(highestY - nextpos.y + size.y / 2);
-            Debug.Log("BuildStep(): Wall height = " + d);
+            //Debug.Log("BuildStep(): Wall height = " + d);
             if (d >= Core.MAX_CLIMB_HEIGHT) return false;
             //            else nextpos.y = highestY + size.y / 2;
         }

@@ -71,7 +71,7 @@ public class UIController : MonoBehaviour
 
     private void HandleGameOver(bool win)
     {
-        message.text = win ? "Gewonnen!" : "Game Over";
+        message.text = win ? "You Win!" : "Game Over";
         victory = win;
         SetState(UIState.GAME_PAUSED);
     }
@@ -80,7 +80,7 @@ public class UIController : MonoBehaviour
     {
         if (!Core.Instance.IsGameOver)
         {
-            message.text = running ? "" : "Pausiert";
+            message.text = running ? "" : "Paused";
             SetState(running ? UIState.GAME_RUNNING : UIState.GAME_PAUSED);
         }
     }

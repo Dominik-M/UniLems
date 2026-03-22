@@ -266,7 +266,7 @@ public class Core : MonoBehaviour
         {
             allLevels[i].Index = i;
             allLevels[i].IsUnlocked = i == 0;
-            allLevels[i].IsUnlocked = true;// Only for debugging
+            //allLevels[i].IsUnlocked = true;// Only for debugging
         }
         Debug.Log("Initialized " + allLevels.Length + " Levels");
     }
