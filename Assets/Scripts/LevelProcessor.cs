@@ -7,6 +7,7 @@ public class LevelProcessor : EditorWindow
 {
     private const string SAVE_PATH = "Assets/Resources/Textures/LogicMasks/";
     private const string VGMAPS_PATH = "Assets/Resources/Textures/visual/";
+    private const string VGMAPS_MAYHEM_PATH = "Assets/Resources/Textures/visual/mayhem/";
     private const string LEVEL_ASSET_SAVE_PATH = "Assets/Resources/Level/";
     private const string LEVEL_PREFABS_SAVE_PATH = "Assets/Prefabs/Level/";
     private const string DEFAULT_LEVEL_PREFAB_PATH = "Assets/Prefabs/Level/Level 0.prefab";
@@ -56,7 +57,7 @@ public class LevelProcessor : EditorWindow
     public static void GenerateLevelAssets()
     {
         // 1. Suche alle PNGs
-        string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { VGMAPS_PATH });
+        string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { VGMAPS_MAYHEM_PATH });
         int skippedCount = 0;
         int createdCount = 0;
 
@@ -65,7 +66,7 @@ public class LevelProcessor : EditorWindow
             string guid = guids[i];
             string path = AssetDatabase.GUIDToAssetPath(guid);
             Texture2D mapTex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-            string assetName = "Level " + i;
+            string assetName = "Level " + (i+90);
 
             // Pfade für die neuen Assets definieren
             string newPrefabPath = $"{LEVEL_PREFABS_SAVE_PATH}/{assetName}.prefab";

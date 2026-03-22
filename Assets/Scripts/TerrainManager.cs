@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class TerrainManager
 {
-
     private const byte threshold = 10; // Für Farb-Vergleich
     private TerrainType[,] logicGrid;
     private Color32[] visualBuffer;
@@ -91,13 +90,12 @@ public class TerrainManager
         return TerrainType.Empty;
     }
 
-    public bool DestroyTerrain(int x, int y)
+    public bool DestroyTerrain(int x, int y, int direction = 0)
     {
         //Debug.Log($"DestroyTerrain({x}, {y})");
         if (x < 0 || x >= width || y < 0 || y >= height) return false;
 
-        // Logik-Check: Steel kann nicht überschrieben werden (außer durch Initialisierung)
-        if (logicGrid[x, y] == TerrainType.Steel) return false;
+        if (!IsTerrainDestructable(logicGrid[x, y], direction)) return false;
 
         logicGrid[x, y] = TerrainType.Empty;
         visualBuffer[y * width + x] = Color.black;
@@ -132,5 +130,28 @@ public class TerrainManager
         return Mathf.Abs(a.r - b.r) < threshold &&
                Mathf.Abs(a.g - b.g) < threshold &&
                Mathf.Abs(a.b - b.b) < threshold;
+    }
+
+    public static bool IsTerrainPassable(TerrainType t)
+    {
+        return t == TerrainType.Empty
+            || t == TerrainType.Stairs
+            || t == TerrainType.Fire
+            || t == TerrainType.Water
+            || t == TerrainType.Bolt;
+    }
+
+    public static bool IsTerrainDestructable(TerrainType t, int direction = 0)
+    {
+        return t == TerrainType.Dirt
+            || t == TerrainType.Stairs
+            || (t == TerrainType.OneWayLeft && direction < 0)
+            || (t == TerrainType.OneWayRight && direction > 0);
+    }
+    public static bool IsTerrainHazard(TerrainType t)
+    {
+        return t == TerrainType.Fire
+            || t == TerrainType.Water
+            || t == TerrainType.Bolt;
     }
 }

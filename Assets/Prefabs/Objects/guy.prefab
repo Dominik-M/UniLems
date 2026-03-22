@@ -261,8 +261,13 @@ MonoBehaviour:
   walkSpeed: 10
   maxFallSpeed: 40
   maxFallSpeedUmbrella: 10
-  maxSafeFallDistance: 50
-  deathAnimationPrefab: {fileID: 7555507762999182495, guid: 14885cd91a6b7de409d5af223b08d2a9, type: 3}
+  maxSafeFallDistance: 61
+  deathAnimationPrefabDefault: {fileID: 7555507762999182495, guid: 14885cd91a6b7de409d5af223b08d2a9, type: 3}
+  deathAnimationPrefabSplash: {fileID: 8915500580573861359, guid: 1455303144154964ca53edfb01af196a, type: 3}
+  deathAnimationPrefabExplode: {fileID: 8680598818964007281, guid: 097206c567506694fb7e12faae426f38, type: 3}
+  deathAnimationPrefabBurn: {fileID: 5162910912013668194, guid: 0a4947678118cd948be366edc54b4e2c, type: 3}
+  deathAnimationPrefabShock: {fileID: 7834434380170384362, guid: b3c322ed843530446936b505e66211dd, type: 3}
+  deathAnimationPrefabDrown: {fileID: 8915500580573861359, guid: 7bd108501ddc8304e8b99249716d393f, type: 3}
   countdownText: {fileID: 4104902192839520823}
   walkAnimation:
   - {fileID: -8296385383580801948, guid: 38d4735ed0566bf4dad4ddad02568c9a, type: 3}

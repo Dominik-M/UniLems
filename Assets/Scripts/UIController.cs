@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class UIController : MonoBehaviour
 {
-    public enum UIState { INIT, MAINMENU, LEVELMENU, GAME_RUNNING, GAME_PAUSED, COUNT }
+    public enum UIState { INIT, MAINMENU, LEVELMENU, SETTINGS, GAME_RUNNING, GAME_PAUSED, COUNT }
 
     public const int STATE_INIT = (int)UIState.INIT;
     public const int STATE_COUNT = (int)UIState.COUNT;
@@ -12,6 +12,7 @@ public class UIController : MonoBehaviour
     [SerializeField] private Text message;
     [SerializeField] private GameObject mainMenu;
     [SerializeField] private GameObject levelMenu;
+    [SerializeField] private GameObject settingsMenu;
     [SerializeField] private GameObject mainButtons;
     [SerializeField] private GameObject bottomMenu;
     [SerializeField] private Text mainButtonLeftLabel;
@@ -37,6 +38,7 @@ public class UIController : MonoBehaviour
             mainButtonRightLabel.text = victory ? "Next Level" : "Retry";
             mainMenu.SetActive(state == UIState.MAINMENU);
             levelMenu.SetActive(state == UIState.LEVELMENU);
+            settingsMenu.SetActive(state == UIState.SETTINGS);
             mainButtons.SetActive(state == UIState.GAME_PAUSED);
             bottomMenu.SetActive(state == UIState.GAME_RUNNING || state == UIState.GAME_PAUSED);
             message.gameObject.SetActive(state == UIState.GAME_PAUSED);
@@ -87,6 +89,7 @@ public class UIController : MonoBehaviour
     {
         Debug.Log("Pause button pressed");
         Core.Instance.Running = !Core.Instance.Running;
+        Core.Instance.AM.PlaySound(SoundEffect.CLICK);
     }
 
     public void HandleLeftMainButtonClicked()
@@ -94,6 +97,7 @@ public class UIController : MonoBehaviour
         Debug.Log("Go to main menu");
         Core.Instance.ClearLevel();
         SetState(UIState.MAINMENU);
+        Core.Instance.AM.PlaySound(SoundEffect.CLICK);
     }
 
     public void HandleRightMainButtonClicked()
@@ -110,11 +114,13 @@ public class UIController : MonoBehaviour
             Debug.Log("Restart Level");
             Core.Instance.StartLevel(Core.Instance.GetCurrentLevel());
         }
+        Core.Instance.AM.PlaySound(SoundEffect.CLICK);
         victory = false;
     }
 
     public void HandleContinueClicked()
     {
+        Core.Instance.AM.PlaySound(SoundEffect.CLICK);
         Level nextLevel = Core.Instance.GetNextLevel();
         if (nextLevel != null && nextLevel.IsUnlocked)
         {

@@ -23,5 +23,6 @@ public class SkillButtonController : MonoBehaviour
     {
         Debug.Log("SkillButton Clicked: " + skill);
         Core.Instance.SelectedSkill = skill;
+        Core.Instance.AM.PlaySound(SoundEffect.CLICK);
     }
 }

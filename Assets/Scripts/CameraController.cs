@@ -3,8 +3,8 @@ using UnityEngine.InputSystem;
 
 public class CameraController : MonoBehaviour
 {
-    const int WIDTH = 180; // Width of the camera frustum
-    const int HEIGHT = 100; // Height of the camera frustum
+    private int WIDTH = 180; // Width of the camera frustum
+    private int HEIGHT = 100; // Height of the camera frustum
 
     public float yOffset = 100;
     public float scrollSpeed = 2f;
@@ -13,6 +13,12 @@ public class CameraController : MonoBehaviour
     public float top = 0.8f;
     public float bottomMax = 0.3f;
     public float bottomMin = 0.2f;
+
+    void Awake()
+    {
+        WIDTH = Screen.width / 12;
+        HEIGHT = Screen.height / 20;
+    }
 
     void Update()
     {

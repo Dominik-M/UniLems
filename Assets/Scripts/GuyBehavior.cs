@@ -8,7 +8,12 @@ public class GuyBehavior : MonoBehaviour
     [SerializeField] private float maxFallSpeed = 40f;
     [SerializeField] private float maxFallSpeedUmbrella = 10f;
     [SerializeField] private float maxSafeFallDistance = 50f;
-    [SerializeField] private GameObject deathAnimationPrefab;
+    [SerializeField] private GameObject deathAnimationPrefabDefault;
+    [SerializeField] private GameObject deathAnimationPrefabSplash;
+    [SerializeField] private GameObject deathAnimationPrefabExplode;
+    [SerializeField] private GameObject deathAnimationPrefabBurn;
+    [SerializeField] private GameObject deathAnimationPrefabShock;
+    [SerializeField] private GameObject deathAnimationPrefabDrown;
     [SerializeField] private TextMesh countdownText;
     [SerializeField] private Sprite[] walkAnimation;
     [SerializeField] private Sprite[] fallAnimation;
@@ -28,7 +33,7 @@ public class GuyBehavior : MonoBehaviour
     private BoxCollider2D guyCollider;
     private SpriteRenderer spriteRenderer;
     private AnimatedImage anim;
-    private bool umbrellaEquiped, explosionTriggered, skillReady, dead, initialized = false;
+    private bool umbrellaEquiped, explosionTriggered, skillReady = false, dead, initialized = false;
     private Vector2 size;
     public bool IsDead { get => dead; }
 
@@ -224,6 +229,8 @@ public class GuyBehavior : MonoBehaviour
     public void Move(float dT)
     {
         if (!initialized) return;
+
+        // Get current Position
         Vector3 pos = transform.localPosition;
         float dx = 0;
         // Only move when doing nothing
@@ -243,6 +250,12 @@ public class GuyBehavior : MonoBehaviour
         TerrainType highestTerrain = terrain.GetHighestSolidPixelInColumn(nextX, yMin, yMax, out newY);
         if (highestTerrain != TerrainType.Empty)
         {
+            // First check if in death zone
+            if (TerrainManager.IsTerrainHazard(highestTerrain))
+            {
+                Die(highestTerrain);
+                return;
+            }
             // Wir haben Boden gefunden!
             if (fallenDistance > maxSafeFallDistance && !umbrellaEquiped)
             {
@@ -259,20 +272,38 @@ public class GuyBehavior : MonoBehaviour
             newY += (size.y / 2);
             float heightDiff = newY - transform.localPosition.y;
 
-            // Check, ob es eine Wand ist (hast du schon, aber hier integriert)
-            if (heightDiff > Core.MAX_CLIMB_HEIGHT && !IsTerrainPassable(highestTerrain))
+            // Check, ob es eine Wand ist
+            if (heightDiff > Core.MAX_CLIMB_HEIGHT)
             {
-                ToggleDirection();
+                if (TerrainManager.IsTerrainPassable(highestTerrain))
+                {
+                    // Walking through stairs
+                    // Climb on next highest ground
+                    yMax = pos.y - (size.y / 2) + Core.MAX_CLIMB_HEIGHT;
+                    highestTerrain = terrain.GetHighestSolidPixelInColumn(nextX, yMin, yMax, out newY);
+                    if (highestTerrain != TerrainType.Empty)
+                    {
+                        newY += (size.y / 2);
+                    }
+                    else
+                    {
+                        // no solid ground, don't climb
+                        newY = pos.y;
+                    }
+                }
+                else
+                {
+                    ToggleDirection();
+                    return;
+                }
             }
-            else
-            {
-                // Erfolg: Wir bewegen uns auf die neue Position (X und das angepasste Y)
-                float dY = Mathf.Abs(pos.y - newY);
-                if (dY < Core.MIN_COLLISION_OFFSET // Kleine Unebenheiten ignorieren - precision error
-                    || dY > Core.MAX_CLIMB_HEIGHT) // Zu große Schritte auch verbieten
-                    newY = pos.y;
-                transform.localPosition = new Vector3(nextX, newY, 0);
-            }
+            // Erfolg: Wir bewegen uns auf die neue Position (X und das angepasste Y)
+            float dY = Mathf.Abs(pos.y - newY);
+            if (dY < Core.MIN_COLLISION_OFFSET // Kleine Unebenheiten ignorieren - precision error
+                || dY > Core.MAX_CLIMB_HEIGHT) // Zu große Schritte auch verbieten
+                newY = pos.y;
+            transform.localPosition = new Vector3(nextX, newY, 0);
+
         }
         else
         {
@@ -309,9 +340,9 @@ public class GuyBehavior : MonoBehaviour
     private bool BuildStep()
     {
         // Nutzt die Konstanten für die Treppen-Dimensionen
-        Vector2 stepPos = (Vector2)transform.localPosition + new Vector2(dir * (size.x / 2), (size.y / -2));
-        int x = Mathf.FloorToInt(stepPos.x);
-        int y = Mathf.FloorToInt(stepPos.y + 0.75f);
+        Vector2 stepPos = (Vector2)transform.localPosition + new Vector2(dir * Core.MIN_COLLISION_OFFSET, (size.y / -2));
+        int x = Mathf.RoundToInt(stepPos.x);
+        int y = Mathf.RoundToInt(stepPos.y);
         bool allfree = true;
         lastDigArea = new Rect(stepPos.x, stepPos.y, Core.STAIR_WIDTH * dir, Core.STAIR_HEIGHT);
         for (int i = 0; i < Core.STAIR_WIDTH; i++)
@@ -321,35 +352,95 @@ public class GuyBehavior : MonoBehaviour
                 allfree &= terrain.BuildStair(x + (i * dir), y + j);
             }
         }
+        // Play Sound
+        Core.Instance.AM.PlaySound(SoundEffect.BUILD);
         // Try climb step
         Vector2 nextpos = new Vector2(transform.localPosition.x, transform.localPosition.y);
         nextpos.x += dir * (Core.STAIR_WIDTH - Core.MIN_COLLISION_OFFSET);
         nextpos.y += Core.STAIR_HEIGHT - Core.MIN_COLLISION_OFFSET;
         // Check collision
         float highestY;
-        TerrainType highestTerrain = terrain.GetHighestSolidPixelInColumn(nextpos.x, nextpos.y-size.y/2, nextpos.y+size.y/2, out highestY);
+        TerrainType highestTerrain = terrain.GetHighestSolidPixelInColumn(nextpos.x, nextpos.y - size.y / 2, nextpos.y + size.y / 2, out highestY);
         if (highestTerrain != TerrainType.Empty)
         {
-            return (highestY-nextpos.y) < Core.MAX_CLIMB_HEIGHT;
+            float d = Mathf.Abs(highestY - nextpos.y + size.y / 2);
+            Debug.Log("BuildStep(): Wall height = " + d);
+            if (d >= Core.MAX_CLIMB_HEIGHT) return false;
+            //            else nextpos.y = highestY + size.y / 2;
         }
-            return true;
+        //Debug.Log("Set Position: " + nextpos);
+        transform.localPosition = nextpos;
+        return true;
     }
 
     private void Die(TerrainType cause)
     {
         switch (cause)
         {
-            case TerrainType.Empty: Debug.Log("Tod durch endlos Fallen"); break;
-            case TerrainType.Dirt: Debug.Log("Tod durch Fallschaden"); break;
-            case TerrainType.Steel: Debug.Log("Tod durch Explosion"); break;
-            case TerrainType.Fire: Debug.Log("Tod durch Verbrennen"); break;
-            case TerrainType.Water: Debug.Log("Tod durch Ertrinken"); break;
-            case TerrainType.Bolt: Debug.Log("Tod durch Stromschlag"); break;
-            case TerrainType.Goal: Debug.Log("Gerettet!"); Core.Instance.AddSavedCount(); break;
-        }
-        if (deathAnimationPrefab)
-        {
-            Destroy(Instantiate(deathAnimationPrefab, transform.position, Quaternion.identity), 2);
+            case TerrainType.Empty:
+                Debug.Log("Tod durch endlos Fallen");
+                // Play Sound
+                Core.Instance.AM.PlaySound(SoundEffect.ENDLESS_FALL_DEATH);
+                // Spawn VFX
+                if (deathAnimationPrefabSplash)
+                    Destroy(Instantiate(deathAnimationPrefabSplash, transform.position, Quaternion.identity), 2);
+                break;
+            case TerrainType.Dirt:
+                Debug.Log("Tod durch Fallschaden");
+                // Play Sound
+                Core.Instance.AM.PlaySound(SoundEffect.FALL_DEATH);
+                // Spawn VFX
+                if (deathAnimationPrefabSplash)
+                    Destroy(Instantiate(deathAnimationPrefabSplash, transform.position, Quaternion.identity), 2);
+                break;
+            case TerrainType.Steel:
+                Debug.Log("Tod durch Explosion");
+                // Play Sound
+                Core.Instance.AM.PlaySound(SoundEffect.EXPLODE);
+                // Spawn VFX
+                if (deathAnimationPrefabExplode)
+                    Destroy(Instantiate(deathAnimationPrefabExplode, transform.position, Quaternion.identity), 2);
+                break;
+            case TerrainType.Fire:
+                Debug.Log("Tod durch Verbrennen");
+                // Play Sound
+                Core.Instance.AM.PlaySound(SoundEffect.BURN);
+                // Spawn VFX
+                if (deathAnimationPrefabBurn)
+                    Destroy(Instantiate(deathAnimationPrefabBurn, transform.position, Quaternion.identity), 2);
+                break;
+            case TerrainType.Water:
+                Debug.Log("Tod durch Ertrinken");
+                // Play Sound
+                Core.Instance.AM.PlaySound(SoundEffect.DROWN);
+                // Spawn VFX
+                if (deathAnimationPrefabDrown)
+                    Destroy(Instantiate(deathAnimationPrefabDrown, transform.position, Quaternion.identity), 2);
+                break;
+            case TerrainType.Bolt:
+                Debug.Log("Tod durch Stromschlag");
+                // Play Sound
+                Core.Instance.AM.PlaySound(SoundEffect.SHOCK);
+                // Spawn VFX
+                if (deathAnimationPrefabShock)
+                    Destroy(Instantiate(deathAnimationPrefabShock, transform.position, Quaternion.identity), 2);
+                break;
+            case TerrainType.Goal:
+                Debug.Log("Gerettet!"); Core.Instance.AddSavedCount();
+                // Play Sound
+                Core.Instance.AM.PlaySound(SoundEffect.SAVED);
+                // Spawn VFX
+                if (deathAnimationPrefabDefault)
+                    Destroy(Instantiate(deathAnimationPrefabDefault, transform.position, Quaternion.identity), 2);
+                break;
+            default:
+                Debug.Log("Tod durch Unbekannt");
+                // Play Sound
+                Core.Instance.AM.PlaySound(SoundEffect.FALL_DEATH);
+                // Spawn VFX
+                if (deathAnimationPrefabDefault)
+                    Destroy(Instantiate(deathAnimationPrefabDefault, transform.position, Quaternion.identity), 2);
+                break;
         }
         dead = true;
         Destroy(gameObject);
@@ -386,12 +477,12 @@ public class GuyBehavior : MonoBehaviour
             for (int y = startY; y < startY + height; y++)
             {
                 TerrainType t = terrain.GetTypeAt(x, y);
-                if (t == TerrainType.Dirt)
-                    terrain.DestroyTerrain(x, y);
-                else if (t != TerrainType.Empty)
+                if (t != TerrainType.Empty && !terrain.DestroyTerrain(x, y, dir))
                     candig = false;
             }
         }
+        // Play Sound
+        Core.Instance.AM.PlaySound(SoundEffect.DIG);
         return candig;
     }
 
@@ -412,15 +503,6 @@ public class GuyBehavior : MonoBehaviour
                 transform.localPosition += new Vector3(Core.MIN_COLLISION_OFFSET * dir, 0, 0);
             }
         }
-    }
-
-    public static bool IsTerrainPassable(TerrainType t)
-    {
-        return t == TerrainType.Empty
-            || t == TerrainType.Stairs
-            || t == TerrainType.Fire
-            || t == TerrainType.Water
-            || t == TerrainType.Bolt;
     }
 
     private void OnDrawGizmos()

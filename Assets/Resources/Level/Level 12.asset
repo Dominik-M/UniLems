@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a83b944858f94ac4882224eb0acc5c8f, type: 3}
   m_Name: Level 12
   m_EditorClassIdentifier: Assembly-CSharp::Level
-  locked: 0
-  totalGuys: 0
-  spawnDelay: 0
-  minGuysSavedToWin: 0
-  skillUsages: 0000000000000000000000000000000000000000000000000000000000000000
+  locked: 1
+  totalGuys: 50
+  spawnDelay: 3
+  minGuysSavedToWin: 50
+  skillUsages: 0000000063000000000000000000000000000000000000000000000000000000
   levelPrefab: {fileID: 8829729640977892095, guid: fab49948586a288458e5f1776375ef11, type: 3}
-  bgm: {fileID: 0}
+  bgm: {fileID: 8300000, guid: 52d52ba52f8c6af4e96fb4a7062be9c5, type: 3}
   visualTexture: {fileID: 2800000, guid: 7d7ddad3194d11c458b40955c1079325, type: 3}
   logicMask: {fileID: 2800000, guid: c01e2902aee2c124e9baaae545e7ee23, type: 3}
   width: 1525

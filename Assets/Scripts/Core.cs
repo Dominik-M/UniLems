@@ -37,7 +37,6 @@ public class Core : MonoBehaviour
     private readonly int[] usagesRemaining = new int[(int)Skill.COUNT];
     private int savedCount;
     private Vector2[] bufferedSpawnPositions;
-    private bool dirty = true;
 
     public Level[] GetAllLevels() { return allLevels; }
 
@@ -107,7 +106,7 @@ public class Core : MonoBehaviour
 
         // Create Level
         GameObject levelObject = SpawnObject(level.Prefab, 0, 0);
-        dirty = true; // set a flag here to update level parameters next frame
+        FindSpawns();
 
         //  Initialize Terrain Manager
         terrainManager.LoadLevel(levelObject, currentLevel);
@@ -128,16 +127,14 @@ public class Core : MonoBehaviour
         GameObject[] spawns = GameObject.FindGameObjectsWithTag("Respawn");
         bufferedSpawnPositions = new Vector2[spawns.Length];
         for (int i = 0; i < spawns.Length; i++)
+        {
             bufferedSpawnPositions[i] = new Vector2(spawns[i].transform.localPosition.x, spawns[i].transform.localPosition.y);
+            spawns[i].tag = "Untagged";// remove tag to not find it again
+        }
     }
 
     void Update()
     {
-        if (dirty)
-        {
-            FindSpawns();
-            dirty = false;
-        }
         // Main loop
         if (Running && !gameover)
         {
@@ -203,6 +200,7 @@ public class Core : MonoBehaviour
     public void GuyClicked(GuyBehavior guy)
     {
         Debug.Log("Clicked at Guy: " + guy);
+        AM.PlaySound(SoundEffect.CLICK);
         if (SelectedSkill == Skill.NONE
             || GetSkillUsages(SelectedSkill) <= 0)
             return;
@@ -268,7 +266,7 @@ public class Core : MonoBehaviour
         {
             allLevels[i].Index = i;
             allLevels[i].IsUnlocked = i == 0;
-            // allLevels[i].IsUnlocked = true;// Only for debugging
+            allLevels[i].IsUnlocked = true;// Only for debugging
         }
         Debug.Log("Initialized " + allLevels.Length + " Levels");
     }

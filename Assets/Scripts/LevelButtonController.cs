@@ -37,5 +37,7 @@ public class LevelButtonController : MonoBehaviour
     {
         if (mLevel != null && mLevel.IsUnlocked)
             Core.Instance.StartLevel(mLevel);
+
+        Core.Instance.AM.PlaySound(SoundEffect.CLICK);
     }
 }
